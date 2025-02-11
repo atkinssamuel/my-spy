@@ -1,0 +1,3 @@
+git+https://github.com/atkinssamuel/google-auth-wrapper.git
+python-dotenv
+google-api-python-client
