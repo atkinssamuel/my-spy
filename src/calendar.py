@@ -56,17 +56,23 @@ def get_events(service: Any, start_date: Any, end_date: Any):
 
     tagged_events = []
 
-    for event in all_events["items"]:
-        if "description" not in event:
-            continue
+    work_event_summaries = set(["US Bank", "Entrepreneurship Block", "Learning Block"])
 
-        description = event["description"]
-        tags = re.findall(r"(#[a-z]*)", description)
+    for event in all_events["items"]:
+        tags = []
+
+        if "description" in event:
+            description = event["description"]
+            tags = re.findall(r"(#[a-z]*)", description)
+
+        summary = event["summary"]
+
+        if summary in work_event_summaries:
+            tags.append("#work")
 
         if len(tags) == 0:
             continue
 
-        summary = event["summary"]
         start = datetime.fromisoformat(event["start"]["dateTime"])
         end = datetime.fromisoformat(event["end"]["dateTime"])
 

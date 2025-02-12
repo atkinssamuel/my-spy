@@ -8,6 +8,10 @@ from .calendar import get_events
 from datetime import timedelta
 
 
+def rounded_str(x: Any) -> str:
+    return x if isinstance(x, str) else f"{x:.2f}"
+
+
 class WeeklyReport:
     def __init__(self, service: Any, week_start: Any, week_end: Any):
         load_dotenv()
@@ -93,7 +97,8 @@ class WeeklyReport:
     def generate_daily_dataframe(self, dataframe: pd.DataFrame, label: str):
         self.markdown_writer.text("")
         self.markdown_writer.table(
-            [" ", *dataframe.columns[1:]], dataframe.values.astype(str)
+            [" ", *dataframe.columns[1:]],
+            dataframe.map(lambda x: rounded_str(x)).values,
         )
         self.markdown_writer.text(f"^{label}")
 
@@ -139,7 +144,7 @@ xMax: 6
 
         for label in unique_work_labels:
             total_hours_worked.append(
-                str(
+                rounded_str(
                     self.work_dataframe[self.work_dataframe["Event"] == label]
                     .values[0, 1:]
                     .sum()
@@ -187,7 +192,9 @@ yMax: 12
         for day in self.days_this_week:
             self.markdown_writer.h2(day.strftime("%A - %m/%d/%Y"))
 
-            hours_worked = self.work_dataframe.loc[:, day.strftime("%A")].sum()
+            hours_worked = (
+                self.work_dataframe.loc[:, day.strftime("%A")].astype(float).sum()
+            )
 
             self.markdown_writer.text("")
 
@@ -200,7 +207,7 @@ yMax: 12
 
             self.markdown_writer.text(f"**Target hours**: {target_hours}")
             self.markdown_writer.text(
-                f"**Hours worked**: <span style=\"color: {'red' if hours_worked < target_hours else 'green'};\">{hours_worked}</span>"
+                f"**Hours worked**: <span style=\"color: {'red' if hours_worked < target_hours else 'green'};\">{rounded_str(hours_worked)}</span>"
             )
 
             self.markdown_writer.text("")
@@ -213,7 +220,7 @@ yMax: 12
                     [
                         event.summary,
                         f"{event.start.strftime("%H:%M")} - {event.end.strftime("%H:%M")}",
-                        f"{event.minute_duration / 60}",
+                        f"{rounded_str(event.minute_duration / 60)}",
                     ]
                     for event in day_events
                 ],
@@ -224,7 +231,7 @@ yMax: 12
             rows = [
                 [
                     l,
-                    str(
+                    rounded_str(
                         self.work_dataframe.loc[
                             self.work_dataframe["Event"] == l,
                             day.strftime("%A"),

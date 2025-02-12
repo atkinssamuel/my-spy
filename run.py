@@ -3,7 +3,7 @@ import os
 from datetime import datetime, timedelta
 from google_auth_wrapper import credentials
 from dotenv import load_dotenv
-from src.calendar import events_this_week, calendar_service
+from src.calendar import calendar_service
 from src.report import WeeklyReport
 
 if __name__ == "__main__":
