@@ -57,6 +57,7 @@ def get_events(service: Any, start_date: Any, end_date: Any):
     tagged_events = []
 
     work_event_summaries = set(["US Bank", "Entrepreneurship Block", "Learning Block"])
+    workout_event_summaries = set(["Gym"])
 
     for event in all_events["items"]:
         tags = []
@@ -65,10 +66,13 @@ def get_events(service: Any, start_date: Any, end_date: Any):
             description = event["description"]
             tags = re.findall(r"(#[a-z]*)", description)
 
-        summary = event["summary"]
+        summary = event["summary"].replace("&", "and")
 
         if summary in work_event_summaries:
             tags.append("#work")
+
+        if summary in workout_event_summaries:
+            tags.append("#gym")
 
         if len(tags) == 0:
             continue

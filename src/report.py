@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from typing import Any
 from src.markdown import MarkdownWriter
 from .calendar import get_events
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 
 def rounded_str(x: Any) -> str:
@@ -103,12 +103,16 @@ class WeeklyReport:
         self.markdown_writer.text(f"^{label}")
 
     def generate_report(self):
+        now = datetime.now()
+
         self.markdown_writer.front_matter("report", self.week_start)
 
         self.markdown_writer.text("Tags: #progress-report")
         self.markdown_writer.text("")
         self.markdown_writer.text("[[____reports (goals)]]")
         self.markdown_writer.text("")
+
+        self.markdown_writer.text(f'**{now.strftime("%B %d at %I:%M%p")}**')
 
         self.markdown_writer.h1(
             f"Week of {self.week_start.strftime("%m/%d/%Y")} - {self.week_end.strftime("%m/%d/%Y")}"
@@ -144,15 +148,19 @@ xMax: 6
 
         for label in unique_work_labels:
             total_hours_worked.append(
-                rounded_str(
-                    self.work_dataframe[self.work_dataframe["Event"] == label]
-                    .values[0, 1:]
-                    .sum()
-                )
+                self.work_dataframe[self.work_dataframe["Event"] == label]
+                .values[0, 1:]
+                .sum()
             )
-
         self.markdown_writer.table(
-            [" ", *unique_work_labels], [["Total", *total_hours_worked]]
+            [" ", "Hours Worked", "Hours Target"],
+            [
+                [
+                    "Total",
+                    rounded_str(rounded_str(sum(total_hours_worked))),
+                    rounded_str(6 * 5 + 4),
+                ]
+            ],
         )
         self.markdown_writer.text("^work-total")
         self.markdown_writer.text(
@@ -160,6 +168,28 @@ xMax: 6
 ```chart
 type: bar
 id: work-total
+layout: rows
+width: 90%
+beginAtZero: true
+indexAxis: y
+xMax: 50
+legend: false
+labelColors: true
+```
+"""
+        )
+
+        self.markdown_writer.table(
+            [" ", *unique_work_labels],
+            [["Total", *[rounded_str(h) for h in total_hours_worked]]],
+        )
+
+        self.markdown_writer.text("^work-categories")
+        self.markdown_writer.text(
+            f"""
+```chart
+type: bar
+id: work-categories
 layout: rows
 width: 90%
 beginAtZero: true
